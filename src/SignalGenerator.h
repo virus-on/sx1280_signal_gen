@@ -7,10 +7,12 @@ struct RadioState
     int frequency = 2400;
     int8 outputPower = 10;
     bool bSignal = false;
+    bool bAmp = false;
 
     bool operator==(const RadioState& rhs)
     {
-        return rhs.bSignal == bSignal 
+        return rhs.bSignal == bSignal
+            && rhs.bAmp == bAmp
             && rhs.frequency == frequency
             && rhs.outputPower == outputPower;
     }

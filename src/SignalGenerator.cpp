@@ -52,9 +52,13 @@ void SignalGenerator::applyState(RadioState& inState)
         inState.outputPower = constrain(inState.outputPower, POWER_MIN_DBM, POWER_MAX_DBM);
         _radio.setOutputPower(inState.outputPower);
     }
+    
     if (inState.bSignal)
     {
-        _amp.applyState(AmplifierState::AMP_TX); // 76/48
+        if (inState.bAmp)
+        {
+            _amp.applyState(AmplifierState::AMP_TX);
+        }
         _radio.transmitDirect();
     }
 

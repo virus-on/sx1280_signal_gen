@@ -24,6 +24,7 @@ h1{font-size:1.5rem;font-weight:700;margin-bottom:4px}
 .row:last-child{margin-bottom:0}
 label{font-size:.88rem;min-width:72px;color:var(--sub)}
 input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer;height:6px}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);cursor:pointer;}
 .val{font-size:.95rem;font-weight:700;min-width:80px;text-align:right}
 .btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;transition:filter .15s,transform .1s,opacity .2s;letter-spacing:.04em}
 .btn:hover:not(:disabled){filter:brightness(1.15);transform:scale(1.02)}
@@ -61,6 +62,11 @@ input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer;height:6px}
            oninput="onPwrInput(this.value)" onchange="applyRF()">
     <span class="val" id="pwrVal">10 dBm</span>
   </div>
+  <div class="row">
+    <label>Ext. Amp</label>
+    <input type="checkbox" id="ampCheckbox" onchange="onAmpChange(this.checked)">
+    <span class="val" id="ampVal" style="color:var(--sub)">OFF</span>
+  </div>
 </div>
 
 <div class="card">
@@ -78,6 +84,8 @@ input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer;height:6px}
     <span class="sval" id="stFreq">&mdash;</span></div>
   <div class="srow"><span>Power</span>
     <span class="sval" id="stPwr">&mdash;</span></div>
+  <div class="srow"><span>Amplifier</span>
+    <span class="sval" id="stAmp">&mdash;</span></div>
   <div class="srow"><span>WiFi Clients</span>
     <span class="sval" id="stClients">&mdash;</span></div>
   <div class="srow"><span>AP Address</span>
@@ -86,10 +94,10 @@ input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer;height:6px}
 
 <script>
 // ── Local state ──
-var pendingFreq = 2450, pendingPwr = 10;
+var pendingFreq = 2450, pendingPwr = 10, pendingAmp = false;
 var actualSignal = false;
 
-// Triggers instantly while dragging
+// Triggers instantly while interacting
 function onFreqInput(v) {
   pendingFreq = +v;
   document.getElementById('freqVal').textContent = v + ' MHz';
@@ -100,11 +108,19 @@ function onPwrInput(v) {
   document.getElementById('pwrVal').textContent = v + ' dBm';
 }
 
-// Triggers when dragging is released (onchange)
+function onAmpChange(checked) {
+  pendingAmp = checked;
+  var valSpan = document.getElementById('ampVal');
+  valSpan.textContent = checked ? 'ON' : 'OFF';
+  valSpan.style.color = checked ? 'var(--green)' : 'var(--sub)';
+  applyRF();
+}
+
+// Triggers when dragging is released (onchange) or checkbox toggled
 function applyRF() {
   var btn = document.getElementById('toggleBtn');
-  btn.disabled = true; // Block button until we get a response
-  fetch('/set?freq='+pendingFreq+'&power='+pendingPwr+'&signal='+(actualSignal?1:0))
+  btn.disabled = true; 
+  fetch('/set?freq='+pendingFreq+'&power='+pendingPwr+'&amp='+(pendingAmp?1:0)+'&signal='+(actualSignal?1:0))
     .then(function(r){return r.json();}).then(updateStatus)
     .catch(function(){ btn.disabled = false; });
 }
@@ -112,9 +128,9 @@ function applyRF() {
 // Toggle signal
 function toggleSignal() {
   var btn = document.getElementById('toggleBtn');
-  btn.disabled = true; // Block button
+  btn.disabled = true; 
   actualSignal = !actualSignal;
-  fetch('/set?freq='+pendingFreq+'&power='+pendingPwr+'&signal='+(actualSignal?1:0))
+  fetch('/set?freq='+pendingFreq+'&power='+pendingPwr+'&amp='+(pendingAmp?1:0)+'&signal='+(actualSignal?1:0))
     .then(function(r){return r.json();}).then(updateStatus)
     .catch(function(){ btn.disabled = false; });
 }
@@ -122,9 +138,16 @@ function toggleSignal() {
 // ── ONLY updates the status section ──
 function updateStatus(d) {
   actualSignal = d.signal;
+  
+  // Sync UI sliders/checkbox with actual device state in case another client changed it
+  pendingAmp = !!d.amp;
+  document.getElementById('ampCheckbox').checked = pendingAmp;
+  var valSpan = document.getElementById('ampVal');
+  valSpan.textContent = pendingAmp ? 'ON' : 'OFF';
+  valSpan.style.color = pendingAmp ? 'var(--green)' : 'var(--sub)';
 
   var btn = document.getElementById('toggleBtn');
-  btn.disabled = false; // Unblock the button since we got a fresh status update
+  btn.disabled = false; 
 
   var sig = document.getElementById('stSig');
   if (actualSignal) {
@@ -139,6 +162,7 @@ function updateStatus(d) {
 
   document.getElementById('stFreq').textContent = d.freq + ' MHz';
   document.getElementById('stPwr').textContent  = d.power + ' dBm';
+  document.getElementById('stAmp').textContent  = d.amp ? 'ENABLED' : 'DISABLED';
   document.getElementById('stClients').textContent = d.clients;
   document.getElementById('dot').className = d.clients > 0 ? 'dot-ok' : '';
 }
