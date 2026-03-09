@@ -26,7 +26,8 @@ void WebServer::handleRoot()
 
 void WebServer::handleSet() 
 {
-    RadioState newRadioState;
+    RadioState newRadioState = _ctx.getSignalGenerator().getState();
+
     if (_server.hasArg("freq")) 
     {
         newRadioState.frequency = _server.arg("freq").toInt();
@@ -42,19 +43,25 @@ void WebServer::handleSet()
 
     _ctx.getSignalGenerator().applyState(newRadioState);
 
-    String json = "{\"signal\":"+ String(newRadioState.bSignal ? "true" : "false") +
-                ",\"freq\":"    + String(newRadioState.frequency) +
-                ",\"power\":"   + String(newRadioState.outputPower) +
-                ",\"clients\":" + String(_ctx.getWiFiController().getConnectedClients()) + "}";
-    _server.send(200, "application/json", json);
+    char jsonBuf[256] = {};
+    snprintf(jsonBuf, sizeof(jsonBuf), 
+        "{\"signal\":%s,\"freq\":%d,\"power\":%d,\"clients\":%d}",
+        newRadioState.bSignal ? "true" : "false",
+        newRadioState.frequency,
+        newRadioState.outputPower,
+        _ctx.getWiFiController().getConnectedClients());
+_server.send(200, "application/json", jsonBuf);
 }
 
 void WebServer::handleStatus() 
 {
     auto& radioState = _ctx.getSignalGenerator().getState();
-    String json = "{\"signal\":"+ String(radioState.bSignal ? "true" : "false") +
-                ",\"freq\":"    + String(radioState.frequency) +
-                ",\"power\":"   + String(radioState.outputPower) +
-                ",\"clients\":" + String(_ctx.getWiFiController().getConnectedClients()) + "}";
-    _server.send(200, "application/json", json);
+    char jsonBuf[256] = {};
+    snprintf(jsonBuf, sizeof(jsonBuf), 
+        "{\"signal\":%s,\"freq\":%d,\"power\":%d,\"clients\":%d}",
+        radioState.bSignal ? "true" : "false",
+        radioState.frequency,
+        radioState.outputPower,
+        _ctx.getWiFiController().getConnectedClients());
+    _server.send(200, "application/json", jsonBuf);
 }

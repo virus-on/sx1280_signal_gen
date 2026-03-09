@@ -8,12 +8,33 @@ struct RadioState
     int8 outputPower = 10;
     bool bSignal = false;
 
-    bool operator==(RadioState& rhs)
+    bool operator==(const RadioState& rhs)
     {
         return rhs.bSignal == bSignal 
             && rhs.frequency == frequency
             && rhs.outputPower == outputPower;
     }
+};
+
+enum class AmplifierState
+{
+    AMP_NONE,
+    AMP_TX,
+    AMP_RX
+};
+
+class AmplifierController
+{
+public:
+    AmplifierController();
+    ~AmplifierController();
+    void applyState(AmplifierState inState);
+
+private:
+    AmplifierState _state = AmplifierState::AMP_NONE;
+    static constexpr int PIN_RXE = 9; // LNA
+    static constexpr int PIN_TXE = 10; // PA
+    static constexpr int SAFE_SWITCH_DELAY_MS = 1;
 };
 
 class SignalGenerator 
@@ -35,6 +56,8 @@ public:
     }
 
 private:
+    AmplifierController _amp;
+    Module _mod;
     SX1280 _radio;
     RadioState _state;
 
