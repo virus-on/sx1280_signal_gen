@@ -1,7 +1,10 @@
-#include <Arduino.h>
 #include "LedController.h"
+
+#include "Config.h"
 #include "WiFiController.h"
 #include "Context.h"
+
+#include <Arduino.h>
 
 LedController::LedController(Context& inContext)
         : _ctx(inContext)

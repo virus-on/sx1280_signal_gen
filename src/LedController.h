@@ -27,9 +27,4 @@ private:
     
     int _breathBrightness = 0;
     bool _bBreathDirection = true;
-
-    static constexpr int BLINK_PERIOD_MS= 500;
-    static constexpr int BREATH_STEP_MS = 3;
-    static constexpr int LED_PIN = 16;
-    static constexpr int LED_MAX = 255;
 };

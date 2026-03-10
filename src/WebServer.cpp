@@ -46,7 +46,7 @@ void WebServer::handleSet()
     }
 
     _ctx.getSignalGenerator().applyState(newRadioState);
-
+    
     char jsonBuf[256] = {};
     snprintf(jsonBuf, sizeof(jsonBuf), 
         "{\"signal\":%s,\"freq\":%d,\"power\":%d,\"amp\":%d,\"clients\":%d}",
@@ -55,7 +55,8 @@ void WebServer::handleSet()
         newRadioState.outputPower,
         newRadioState.bAmp,
         _ctx.getWiFiController().getConnectedClients());
-_server.send(200, "application/json", jsonBuf);
+    _server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    _server.send(200, "application/json", jsonBuf);
 }
 
 void WebServer::handleStatus() 
@@ -69,5 +70,6 @@ void WebServer::handleStatus()
         radioState.outputPower,
         radioState.bAmp,
         _ctx.getWiFiController().getConnectedClients());
+    _server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     _server.send(200, "application/json", jsonBuf);
 }

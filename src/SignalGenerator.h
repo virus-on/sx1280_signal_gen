@@ -1,11 +1,13 @@
 #pragma once
 
+#include "Config.h"
+
 #include <RadioLib.h>
 
 struct RadioState
 {
-    int frequency = 2400;
-    int8 outputPower = 10;
+    int frequency = FREQ_MIN_MHZ;
+    int8 outputPower = POWER_MIN_DBM;
     bool bSignal = false;
     bool bAmp = false;
 
@@ -34,9 +36,7 @@ public:
 
 private:
     AmplifierState _state = AmplifierState::AMP_NONE;
-    static constexpr int PIN_RXE = 9; // LNA
-    static constexpr int PIN_TXE = 10; // PA
-    static constexpr int SAFE_SWITCH_DELAY_MS = 1;
+
 };
 
 class SignalGenerator 
@@ -63,8 +63,5 @@ private:
     SX1280 _radio;
     RadioState _state;
 
-    static constexpr int POWER_MIN_DBM = -17;
-    static constexpr int POWER_MAX_DBM = 12;
-    static constexpr int FREQ_MIN_MHZ = 2400;
-    static constexpr int FREQ_MAX_MHZ = 2500;
+
 };

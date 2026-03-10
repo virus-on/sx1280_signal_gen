@@ -1,22 +1,22 @@
 #pragma once
 
-#include <memory>
-
+#include "Config.h"
 #include "SignalGenerator.h"
 #include "WiFiController.h"
 #include "WebServer.h"
 #include "LedController.h"
 
+#include <memory>
+
 class Context 
 {
 public:
-    Context(const char* inHTMLPage) 
-    {
-        _webServer = std::make_unique<WebServer>(*this, inHTMLPage);
-        _ledController = std::make_unique<LedController>(*this);
-        _signalGenerator = std::make_unique<SignalGenerator>();
-        _wifiController = std::make_unique<WiFiController>("SX1280 Signal Generator");
-    }
+    Context(const char* inHTMLPage)
+    : _webServer(std::make_unique<WebServer>(*this, inHTMLPage))
+    , _ledController(std::make_unique<LedController>(*this))
+    , _signalGenerator(std::make_unique<SignalGenerator>())
+    , _wifiController(std::make_unique<WiFiController>(WIFI_SSID, WIFI_PASSWORD))
+    {}
 
 public:
     WebServer& getWebServer() 

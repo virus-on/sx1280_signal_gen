@@ -9,9 +9,9 @@ public:
     WiFiController(const char* SSID, const char* password = "")
     {
         WiFi.mode(WIFI_AP);
-        WiFi.setOutputPower(6.f);
+        WiFi.setOutputPower(6.f); // So that enough power remains for sx1280
         WiFi.softAP(SSID, password);
-        Serial.print(F("[WiFi] AP \"SX1280-Control\" started. IP: "));
+        Serial.printf("[WiFi] AP \"%s\" started. IP: ", SSID);
         Serial.println(WiFi.softAPIP());
     }
 

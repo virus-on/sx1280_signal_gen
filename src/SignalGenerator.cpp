@@ -1,14 +1,8 @@
 #include "SignalGenerator.h"
-#include "Arduino.h"
+#include "Config.h"
 
-// --- Hardware Pin Definitions ---
-#define RADIO_MOSI  13
-#define RADIO_MISO  12
-#define RADIO_SCLK  14
-#define RADIO_NSS   15
-#define RADIO_DIO1   4
-#define RADIO_BUSY   5
-#define RADIO_RST    2
+#include <Arduino.h>
+
 
 SignalGenerator::SignalGenerator()
     : _mod(RADIO_NSS, RADIO_DIO1, RADIO_RST, RADIO_BUSY)
